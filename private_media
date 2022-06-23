@@ -1,0 +1,9 @@
+///メディア表示制御///////////////////////////////////////////////////////////////////////////////
+function display_only_self_uploaded_medias( $query ) {
+$userIdse = '1,2,3,4,5';
+	if ( $user = wp_get_current_user() ) {
+    $query['author'] = $userIdse;
+  }
+  return $query;
+}
+add_action( 'ajax_query_attachments_args', 'display_only_self_uploaded_medias' );
