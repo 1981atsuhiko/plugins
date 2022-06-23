@@ -1,0 +1,32 @@
+///カテゴリチェックリスト制御//////////////////////////////////////////////////////////////////////////
+require_once(ABSPATH . '/wp-admin/includes/template.php');
+class Category_Checklist extends Walker_Category_Checklist {
+     function start_el( &$output, $category, $depth = -1, $args = array(), $id = 0 ) {
+		$userCat = array(72,73,75);
+		extract($args);
+		if ( empty($taxonomy) )
+			$taxonomy = 'category';
+
+		if ( $taxonomy == 'category' )
+			$name = 'post_category';
+		else
+			$name = 'tax_input['.$taxonomy.']';
+
+		$class = in_array( $category->term_id, $popular_cats ) ? ' class="popular-category"' : '';
+		//親カテゴリの時はチェックボックス表示しない
+		$tId = $category->term_id;
+		//$res = array_intersect($tId,$userCat);
+		$dispCat = in_array($tId,$userCat,true);
+		//var_dump($dispCat);
+		if($dispCat){
+		    $output .= "\n<li id='{$taxonomy}-{$category->term_id}'$class>" . '<label class="selectit"><input value="' . $category->term_id . '" type="checkbox" name="'.$name.'[]" id="in-'.$taxonomy.'-' . $category->term_id . '"' . checked( in_array( $category->term_id, $selected_cats ), true, false ) . disabled( empty( $args['disabled'] ), false, false ) . ' /> ' . esc_html( apply_filters('the_category', $category->name )) . '</label>';
+		}
+	}
+
+}
+function lig_wp_category_terms_checklist_no_top( $args, $post_id = null ) {
+    $args['checked_ontop'] = false;
+    $args['walker'] = new Category_Checklist();
+    return $args;
+}
+add_action( 'wp_terms_checklist_args', 'lig_wp_category_terms_checklist_no_top' );
