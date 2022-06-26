@@ -1,5 +1,45 @@
-/////////////////////////////////////////////////////////////
+//js
+<script>
+jQuery(function($){
+    // ajaxの通信
+    $('#company').change(function(){
+        var cahngeC = $(this).val();
+        console.log(cahngeC);
+        $.ajax({
+            type:"POST",
+            url:ajaxurl,
+            data:{
+                "action":'view_sitename',
+                "company":cahngeC,
+                "nonce":'<?php echo wp_create_nonce( 'my-ajax-nonce-val' ); ?>'
+            },
+            success: function( response ){
+                $('#resultarea').html( response );
+            }
+        });
+        return false;
+    });
+});
+</script>
 
+//php functions
+function add_my_ajaxurl() {
+?>
+<script>
+	var ajaxurl = '<?php echo admin_url( 'admin-ajax.php'); ?>';
+</script>
+<?php
+}
+add_action( 'wp_head', 'add_my_ajaxurl', 1 );
+function view_sitename(){
+    $mes = $_POST['company'];
+	echo $mes;
+    die();
+}
+add_action( 'wp_ajax_view_sitename', 'view_sitename' );
+add_action( 'wp_ajax_nopriv_view_sitename', 'view_sitename' );
+
+//php page
 global $wpdb;
 $order_id = [141,152,528,1088];
 $selected_id = [528];
@@ -35,5 +75,3 @@ foreach ($dResults as $resultd) {
 }
 ?>
 </select>
-<hr>
-<div id="resultarea" style="background-color:#ffff9d; margin-top:15px;"></div>
