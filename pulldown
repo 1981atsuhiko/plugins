@@ -1,0 +1,39 @@
+/////////////////////////////////////////////////////////////
+
+global $wpdb;
+$order_id = [141,152,528,1088];
+$selected_id = [528];
+$ids = implode(",",$order_id);
+$selectedId = implode(",",$selected_id);
+$sQuery = "SELECT ID,post_title FROM $wpdb->posts WHERE ID IN(".$ids.");";
+$sResults = $wpdb->get_results( $sQuery );
+?>
+<select id="company" name="company">
+<?php
+foreach ($sResults as $results) {
+    $ID = $results -> ID;
+    $title = $results -> post_title;
+?>
+<option value="<?php echo $ID;?>"<?php if($selectedId === $ID){ echo 'selected'; }?>><?php echo $title;?></option>
+<?php
+}
+?>
+</select>
+<hr>
+<?php
+$dQuery = "SELECT post_id,meta_key FROM $wpdb->postmeta WHERE post_id = $selectedId";
+$dResults = $wpdb->get_results( $dQuery );
+?>
+<select id="devision" name="devision">
+<?php
+foreach ($dResults as $resultd) {
+    $dID = $resultd -> post_id;
+    $dTitle = $resultd -> meta_key;
+?>
+<option value="<?php echo $dID;?>"><?php echo $dTitle;?></option>
+<?php
+}
+?>
+</select>
+<hr>
+<div id="resultarea" style="background-color:#ffff9d; margin-top:15px;"></div>
