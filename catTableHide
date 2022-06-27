@@ -1,0 +1,33 @@
+////////////////////////////////////////////////////////////////////////////
+function wp_terms_checklists() {
+	$userCat = [71,72,75,80,81];
+	$userCatId = preg_filter('/^/', '#tag-', $userCat);
+	$json = json_encode($userCatId);
+	?>
+	<script>
+		jQuery(function($){
+			allCat = [];
+			var userCat = <?php echo $json;?>;
+			$('#the-list tr').each(function(){
+				allCat.push( $( this ).attr( "id" ));
+			});
+			allCatId = [];
+			allCat.forEach(function (value, index) {
+				allCatId.push('#' + value);
+			});
+			var delCat = allCatId.filter(i => userCat.indexOf(i) == -1);
+			$.each(delCat, function() {
+				$('tr' + delCat).hide();
+			});
+			catlist = [];
+			$('#the-list tr td.name strong a').each(function(){
+				catlist.push( $( this ).text());
+			});
+			$("#the-list tr td.name strong a").not(":contains('— —')").css({"pointer-events":"none","cursol":"nomal","color":"#333"});
+
+
+		});
+	</script>
+	<?php
+}
+add_action( 'add_category_form_pre', 'wp_terms_checklists' );
