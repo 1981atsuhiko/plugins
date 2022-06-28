@@ -50,3 +50,10 @@ function pre_get_author_posts( $query ) {
   }
 }
 add_action( 'pre_get_posts', 'pre_get_author_posts' );
+
+$fruits = array(); //配列の初期化
+$field = ['aaa','bbb','ccc'];
+foreach( $field as $value ){ // 配列の作成
+  $fruits[] = 'りんご';
+}
+var_dump($fruits);
