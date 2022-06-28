@@ -1,35 +1,52 @@
-//投稿一覧制御///////////////////////////////////////////////////////////////////////////////////
 function pre_get_author_posts( $query ) {
-    if ( is_admin() && !current_user_can('administrator') && $query->is_main_query()
-            && ( !isset($_GET['author']) || $_GET['author'] == get_current_user_id() )) {
-        $query->set( 'author', '1,2' );
-        unset($_GET['author']);
+  if(is_admin()){
+    global $wpdb;
+    global $accessUser;
+    $User = $accessUser;
+    $portalAdmin = $User -> isPortalAdmin;
+    $systemAdmin = $User-> isSystemAdmin;
+    $UserComId = $User -> company_ids;
+
+    //サイト管理者か
+    if($portalAdmin == false && $systemAdmin == false && !empty($UserComId)){
+      $siteAdmin = true;
+    }else{
+      $siteAdmin = false;
     }
+    //サイト管理者は以下のユーザー情報取得
+    //マスター
+    $UserComIds = "'" . join("','", $UserComId) . "'";
+    $cquery = "select email from mst_employees where company_id in ($UserComIds)";
+    $cresult = $wpdb->get_results($cquery,ARRAY_A);
+    $data = array_column($cresult, 'email');
+    $data1 = implode(',',$data);
+    
+    foreach($data as $datas){
+      $uquery = "select ID from $wpdb->users where user_email LIKE \"%%$datas%%\"";
+      $uresult = $wpdb->get_results($uquery,ARRAY_A);
+      $IDs = $uresult;
+    };
+    
+    //wp    
+    $wpUser = wp_get_current_user();
+    $userdata = $wpUser;
+    $wpmail = $userdata -> user_email;
+
+    if(!empty($UserComId)){
+      $siteAdmin = true; 
+    }
+    if($portalAdmin){
+        $wpUserId = '';
+    }elseif($systemAdmin){
+        $wpUserId = '';
+    }elseif($siteAdmin){
+      $wpUserId ='1,2,4';
+    }else {
+        $wpUserId = $wpUser->ID;
+    }
+    if ( $query->is_main_query() && ( !isset($_GET['author']))) {
+        $query->set( 'author', $wpUserId );
+    }
+  }
 }
 add_action( 'pre_get_posts', 'pre_get_author_posts' );
-function count_author_posts( $counts, $type = 'post', $perm = '' ) {
-  if ( !is_admin() || current_user_can('administrator') ) {
-    return $counts;
-  }
-  global $wpdb;
-  if ( ! post_type_exists( $type ) )
-    return new stdClass;
-  $cache_key = _count_posts_cache_key( $type, $perm ) . '_author';
-  $counts = wp_cache_get( $cache_key, 'counts' );
-  if ( false !== $counts ) {
-    return $counts;
-  }
-  $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s";
-  $query .= $wpdb->prepare( " AND ( post_author = %d )", get_current_user_id() );
-  $query .= ' GROUP BY post_status';
- 
-  $results = (array) $wpdb->get_results( $wpdb->prepare( $query, $type ), ARRAY_A );
-  $counts = array_fill_keys( get_post_stati(), 0 );
-  foreach ( $results as $row ) {
-    $counts[ $row['post_status'] ] = $row['num_posts'];
-  }
-  $counts = (object) $counts;
-  wp_cache_set( $cache_key, $counts, 'counts' );
-  return $counts;
-}
-add_filter( 'wp_count_posts', 'count_author_posts', 10, 3 );
