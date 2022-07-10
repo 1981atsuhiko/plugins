@@ -1,0 +1,43 @@
+//更新後のメッセージ
+function save_test() {
+	global $typenow;
+	global $pagenow;
+	$reUrl = 'edit.php?post_type='.$typenow;
+	if($pagenow == 'post.php'){
+		?>
+		<style>
+			.notice-success {
+				display: none;
+			}
+		</style>
+		<script>
+		jQuery(function($) {
+			var successClass = 'notice-success';
+			var errorClass = 'notice-error';
+			var text = $('.notice-success').text();
+			var ud = $('#message').attr('class');
+			if(ud.indexOf(successClass) >= 0){
+				alert('更新に成功しました。');
+				location.href = '<?php echo $reUrl;?>';
+			}else if(ud.indexOf(errorClass) >= 0){
+				alert('更新に失敗しました。');
+			}else{
+				alert('投稿一覧画面に戻ります。');
+				location.href = '<?php echo $reUrl;?>';
+			}
+		});
+		</script>
+	<?php
+	}
+}
+add_action('admin_head', 'save_test');
+//更新ボタン押下時
+function confirm_publish() {
+	echo '<script type="text/javascript"><!--
+	var publish = document.getElementById("publish");
+	if (publish !== null) publish.onclick = function(){
+		return confirm(publish.value + "します。よろしいですか？");
+	};
+	// --></script>';
+}
+add_action('admin_footer', 'confirm_publish');
