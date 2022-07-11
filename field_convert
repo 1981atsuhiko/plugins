@@ -1,0 +1,11 @@
+function posteditor_manage_colum() {
+	?>
+    <script>
+		jQuery(function($){
+			$('#postbox-container-2').after($('#post-body-content'));
+			$('#meta_id3').after($('#meta_id1'),$('#meta_id2'));
+		});
+  </script>
+  <?php
+}
+add_action('admin_footer', 'posteditor_manage_colum');
